@@ -41,9 +41,10 @@ namespace UsbRelayTest
 
             using (Timer tempTimer = new Timer(interval: tempCheckInterval))
             {
+                Random rand = new Random(23984256);
                 I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>());
                 RelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
-                tempTimer.Elapsed += (sender, e) => TemperatureCheckHandler(logger, thermometer, relayService);
+                tempTimer.Elapsed += (sender, e) => TemperatureCheckHandler(logger, rand, thermometer, relayService);
                 tempTimer.Start();
             }
         }
@@ -55,14 +56,13 @@ namespace UsbRelayTest
         /// <param name="relayService"></param>
         private static void TemperatureCheckHandler(
             Microsoft.Extensions.Logging.ILogger logger,
+            Random rand,
             I2CThermometer thermometer,
             RelayService relayService)
         {
             double measuredTemp = thermometer.GetTemp(ThermometerConstants.Fahrenheit);
             logger.LogDebug($"Measured temperature is {measuredTemp} Fahrenheit.");
-
-            Random rand = new Random(23984256);
-
+            
             if(measuredTemp <= 65)
             {
                 logger.LogDebug($"Temperature is less than 65 workflow.");
