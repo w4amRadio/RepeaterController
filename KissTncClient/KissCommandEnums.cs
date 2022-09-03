@@ -8,17 +8,17 @@ namespace KissTncClient
 {
     public enum KissCommandEnums
     {
-        DataFrame = 0x00,
-        TxDelay = 0x01,
-        P = 0x02,
-        SlotTime = 0x03,
-        TxTail = 0x04,
-        FullDuplex = 0x05,
-        SetHardware = 0x06,
-        MaxKissCommand = 0x07,
-        Undefined = 0x80,
-        MinKissCommand = 0xFD,
-        LoopbackTest = 0xFE,
-        Return = 0xFF
+        DataFrame = (byte) 0x00,
+        TxDelay = (byte) 0x01,
+        P = (byte) 0x02,
+        SlotTime = (byte) 0x03,
+        TxTail = (byte) 0x04,
+        FullDuplex = (byte) 0x05,
+        SetHardware = (byte) 0x06,
+        MaxKissCommand = (byte) 0x07,
+        Undefined = (byte) 0x80,
+        MinKissCommand = (byte) 0xFD,
+        LoopbackTest = (byte) 0xFE,
+        Return = (byte) 0xFF
     }
 }

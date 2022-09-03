@@ -8,9 +8,9 @@ namespace KissTncClient
 {
     public enum KissEnums
     {
-        FEND = 0xC0,
-        FESC = 0xDB,
-        TFEND = 0xDC,
-        TFESC = 0xDD
+        FEND = (byte) 0xC0,
+        FESC = (byte) 0xDB,
+        TFEND = (byte) 0xDC,
+        TFESC = (byte) 0xDD
     }
 }

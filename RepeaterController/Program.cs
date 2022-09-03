@@ -34,6 +34,11 @@ namespace UsbRelayTest
 
             Microsoft.Extensions.Logging.ILogger logger = serilogFactory.CreateLogger<Program>();
 
+
+
+            //Start up our tnc to talk to direwolf and wait for command authority commands
+
+
             //Measure the temperature every 30 seconds, if the temp is above a certain value, turn the fan on
             //if the temperature is below a certain value, turn the fans off
 
