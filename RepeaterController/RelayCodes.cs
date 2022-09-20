@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UsbRelayTest
+namespace RepeaterController
 {
     public enum RelayCodes
     {

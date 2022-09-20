@@ -8,10 +8,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using HidLibrary;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RepeaterController;
+using RepeaterController.Interfaces;
+using RepeaterController.Models;
 using Serilog;
 using Serilog.Extensions.Logging;
 using UsbRelayTest.Extensions;
@@ -23,8 +28,13 @@ namespace UsbRelayTest
 
         const int tempCheckInterval = 30000;        //TODO: make configurable at run time
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
+            IConfiguration config = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .Build();
+
             var serilogLogger = Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
@@ -44,13 +54,39 @@ namespace UsbRelayTest
 
             logger.LogDebug($"Instantiating timer for temp checking with interval of {tempCheckInterval/1000} seconds.");
 
-            using (Timer tempTimer = new Timer(interval: tempCheckInterval))
+
+            var debugConfigs = config.GetSection($"Settings:{nameof(DebugConfigs)}")?.Get<DebugConfigs>();
+
+            if (debugConfigs.DebugRelayOnly)
             {
-                Random rand = new Random(23984256);
-                I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>());
-                RelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
-                tempTimer.Elapsed += (sender, e) => TemperatureCheckHandler(logger, rand, thermometer, relayService);
-                tempTimer.Start();
+                //IRelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
+                IRelayService relayService = new LibUsbRelayService();
+
+                //turn on 1
+                relayService.TurnOneOn();
+                Thread.Sleep(10000);
+                relayService.TurnOneOff();
+                Thread.Sleep(10000);
+                relayService.TurnTwoOn();
+                Thread.Sleep(10000);
+                relayService.TurnTwoOff();
+                Thread.Sleep(10000);
+                //turn on for 10 seconds
+                relayService.TurnAllOn();
+                Thread.Sleep(10000);
+                relayService.TurnAllOff();
+                
+            }
+            else
+            {
+                using (System.Timers.Timer tempTimer = new System.Timers.Timer(interval: tempCheckInterval))
+                {
+                    Random rand = new Random(23984256);
+                    I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>());
+                    RelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
+                    tempTimer.Elapsed += (sender, e) => TemperatureCheckHandler(logger, rand, thermometer, relayService);
+                    tempTimer.Start();
+                }
             }
         }
 

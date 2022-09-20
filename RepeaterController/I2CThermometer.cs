@@ -31,7 +31,7 @@ namespace UsbRelayTest
             _logger = logger;
 
             //what is our i2cBus Id?
-            I2cBus i2cbus = I2cBus.Create(0);
+            I2cBus i2cbus = I2cBus.Create(1);
             _logger.LogDebug($"I2cBus created.");
 
             device = i2cbus.CreateDevice(mcp9808_thermometer);

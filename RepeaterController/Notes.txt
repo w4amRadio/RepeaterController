@@ -1,0 +1,7 @@
+﻿Get-PnpDevice -PresentOnly | Where-Object { $_.InstanceId -match '^USB' }
+
+
+dotnet publish RepeaterController.csproj -r linux-arm64 -c debug --self-contained true
+then tar publish directory
+sftp pi@192.168.0.188 repeaterController.tar
+put repeaterController.tar

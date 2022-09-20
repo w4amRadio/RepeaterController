@@ -6,15 +6,17 @@
 
 using HidLibrary;
 using Microsoft.Extensions.Logging;
+using RepeaterController.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UsbRelayTest
+namespace RepeaterController
 {
-    public class RelayService : IDisposable
+    //This only seems to work on Windows because RPi nuget can't resolve hid.dll 
+    public class RelayService : IRelayService, IDisposable
     {
 
         private HidDevice _device;
