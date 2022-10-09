@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace RepeaterController
 {
-    //This only seems to work on Windows because RPi nuget can't resolve hid.dll 
+    //This only seems to work on Windows because RPi nuget can't resolve hid.dll, it can however, resolve libusb-1.0 as they are linux binaries
     public class RelayService : IRelayService, IDisposable
     {
 
@@ -25,8 +25,8 @@ namespace RepeaterController
         private bool _oneIsOn = false;
         private bool _twoIsOn = false;
 
-        private const int vendorId = 5824;
-        private const int productId = 1503;
+        private const int vendorId = 5824;      //0x16c0
+        private const int productId = 1503;     //0x05df
 
         public RelayService(ILogger logger)
         {

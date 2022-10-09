@@ -9,5 +9,6 @@ namespace RepeaterController.Models
     public class DebugConfigs
     {
         public bool DebugRelayOnly { get; set; }
+        public bool DebugThermometerOnly { get; set; }
     }
 }

@@ -16,6 +16,8 @@ namespace UsbRelayTest
     {
         ConfigurationRegister = (byte)0x01,
         ReadRegister = (byte)0x05,  //read two bytes from this register
+        ManufacturerIdRegister = (byte)0x06,
+        DeviceIdRegister = (byte)0x07,
         ResolutionRegister = (byte)0x08
         
     }

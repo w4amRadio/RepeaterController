@@ -1,7 +1,26 @@
 ﻿Get-PnpDevice -PresentOnly | Where-Object { $_.InstanceId -match '^USB' }
 
 
+(make sure to deploy linux-arm64 for 64 bit ARM device)
 dotnet publish RepeaterController.csproj -r linux-arm64 -c debug --self-contained true
+dotnet publish C:\Users\Rhysdan\source\repos\RepeaterController\RepeaterController\RepeaterController.csproj -r linux-arm64 -c debug --self-contained true
 then tar publish directory
-sftp pi@192.168.0.188 repeaterController.tar
+sftp pi@192.168.1.30 repeaterController.tar
 put repeaterController.tar
+
+(on pi side)
+tar -xvf repeaterController.tar -C ~/repeaterController 
+
+For libusb, must create symlink (libusb must already be installed, e.g., sudo apt-get install libusb-1.0)
+It should then show up in place like /usr/lib/aarch64-linux-gnu/libusb-1.0.so
+
+Serial number of the device can be found like: lsusb -v -d 16c0:05df
+Linux seems to have a different vendor and product id, only enumerating in hexadecimal format
+
+In order for LibUsbRelayService to work a symlink must be created:
+cd /usr/lib/aarch64-linux-gnu/
+sudo ln -s libusb-1.0.so.0 libusb-1.0.so
+
+
+ls /dev/*i2c*
+i2cdetect -y 1

@@ -35,7 +35,7 @@ namespace KissTncClient
             if (_client.Connected)
             {
                 stream = _client.GetStream();
-                stream.BeginRead(_messageBuffer, 0, _messageBuffer.Length, new AsyncCallback(ReadCallback), stream)
+                stream.BeginRead(_messageBuffer, 0, _messageBuffer.Length, new AsyncCallback(ReadCallback), stream);
             }
             
 
@@ -67,7 +67,7 @@ namespace KissTncClient
 
             if(!stream.DataAvailable)
             {
-                DataReceived(message);
+                //DataReceived(message);
             }
 
             //make recursive call to ReadCallback until the message is over

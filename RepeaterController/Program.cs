@@ -59,8 +59,8 @@ namespace UsbRelayTest
 
             if (debugConfigs.DebugRelayOnly)
             {
-                //IRelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
-                IRelayService relayService = new LibUsbRelayService();
+                IRelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
+                //IRelayService relayService = new LibUsbRelayService(serilogFactory.CreateLogger<LibUsbRelayService>());
 
                 //turn on 1
                 relayService.TurnOneOn();
@@ -75,14 +75,19 @@ namespace UsbRelayTest
                 relayService.TurnAllOn();
                 Thread.Sleep(10000);
                 relayService.TurnAllOff();
-                
+            }
+            if (debugConfigs.DebugThermometerOnly)
+            {
+                I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>(), true);
+                double measuredTemp = thermometer.GetTemp(ThermometerConstants.Fahrenheit);
+                logger.LogDebug($"Measured temperature is {measuredTemp} Fahrenheit.");
             }
             else
             {
                 using (System.Timers.Timer tempTimer = new System.Timers.Timer(interval: tempCheckInterval))
-                {
+                {  
                     Random rand = new Random(23984256);
-                    I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>());
+                    I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>(), false);
                     RelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
                     tempTimer.Elapsed += (sender, e) => TemperatureCheckHandler(logger, rand, thermometer, relayService);
                     tempTimer.Start();
