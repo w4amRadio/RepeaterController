@@ -14,5 +14,7 @@ namespace RepeaterController.Interfaces
         void TurnOneOff();
         void TurnTwoOn();
         void TurnTwoOff();
+        bool OneIsOn { get; }
+        bool TwoIsOn { get; }
     }
 }

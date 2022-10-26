@@ -10,12 +10,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RepeaterController
+namespace RepeaterController.Services.RelayServices
 {
     public enum RelayDevices
     {
         RelayAll = (byte) 0x00,
         Relay1 = (byte) 0x01,
-        Relay2 = (byte) 0x02
+        Relay2 = (byte) 0x02,
+        Relay3 = (byte) 0x03
     }
 }

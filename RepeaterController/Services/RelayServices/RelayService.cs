@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RepeaterController
+namespace RepeaterController.Services.RelayServices
 {
     //This only seems to work on Windows because RPi nuget can't resolve hid.dll, it can however, resolve libusb-1.0 as they are linux binaries
     public class RelayService : IRelayService, IDisposable

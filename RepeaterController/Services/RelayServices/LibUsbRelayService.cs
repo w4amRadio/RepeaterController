@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using RepeaterController.Interfaces;
 using UsbRelayTest;
 
-namespace RepeaterController
+namespace RepeaterController.Services.RelayServices
 {
     ///https://github.com/LibUsbDotNet/LibUsbDotNet
     ///for this version: https://github.com/LibUsbDotNet/LibUsbDotNet/tree/v2
@@ -26,6 +26,10 @@ namespace RepeaterController
 
         private UsbDevice device;
         private IUsbDevice wholeUsbDevice;
+
+        public bool OneIsOn => throw new NotImplementedException();
+
+        public bool TwoIsOn => throw new NotImplementedException();
 
         public LibUsbRelayService(ILogger logger)
         {

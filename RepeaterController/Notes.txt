@@ -5,7 +5,7 @@
 dotnet publish RepeaterController.csproj -r linux-arm64 -c debug --self-contained true
 dotnet publish C:\Users\Rhysdan\source\repos\RepeaterController\RepeaterController\RepeaterController.csproj -r linux-arm64 -c debug --self-contained true
 then tar publish directory
-sftp pi@192.168.1.30 repeaterController.tar
+sftp pi@192.168.8.206 repeaterController.tar
 put repeaterController.tar
 
 (on pi side)
@@ -24,3 +24,12 @@ sudo ln -s libusb-1.0.so.0 libusb-1.0.so
 
 ls /dev/*i2c*
 i2cdetect -y 1
+
+
+raspi-gpio get --> prints the state of all GPIO pins
+raspi-gpio get X --> prints the state of GPIO pin X
+raspi-gpio set X --> op sets GPIO pin X as an output
+raspi-gpio set X --> dh sets GPIO pin X to drive high
+raspi-gpio set X --> dl sets GPIO pin X to drive low
+
+192.168.8.1

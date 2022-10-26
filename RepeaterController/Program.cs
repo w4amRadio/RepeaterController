@@ -20,6 +20,8 @@ using RepeaterController.Models;
 using Serilog;
 using Serilog.Extensions.Logging;
 using UsbRelayTest.Extensions;
+using RepeaterController.Services.RelayServices;
+using RepeaterController.Services.Radio;
 
 namespace UsbRelayTest
 {
@@ -56,11 +58,32 @@ namespace UsbRelayTest
 
 
             var debugConfigs = config.GetSection($"Settings:{nameof(DebugConfigs)}")?.Get<DebugConfigs>();
+            var radioConfigs = config.GetSection($"Settings:{nameof(RadioConfigs)}")?.Get<RadioConfigs>();
+
+            if (debugConfigs.DebugRadio)
+            {
+                //for this test key mic, leave on for 10seconds, turn off mic, then change channel up twice, then change channel down twice
+                IRelayRadioService relayRadio = new AnyTone778Service(new LinuxFileHidDevice(), radioConfigs);
+                relayRadio.ActivatePtt();
+                Thread.Sleep(10000);
+                relayRadio.DeactivatePtt();
+
+                relayRadio.ChannelUp();
+                Thread.Sleep(3000);
+                relayRadio.ChannelUp();
+
+                Thread.Sleep(10000);
+                relayRadio.ChannelDown();
+                Thread.Sleep(3000);
+                relayRadio.ChannelDown();
+            }
 
             if (debugConfigs.DebugRelayOnly)
             {
-                IRelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
+                //IRelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
                 //IRelayService relayService = new LibUsbRelayService(serilogFactory.CreateLogger<LibUsbRelayService>());
+                //HidSharpTestService hidSharpTestService = new HidSharpTestService();
+                IRelayService relayService = new LinuxFileHidDevice();
 
                 //turn on 1
                 relayService.TurnOneOn();
@@ -76,21 +99,30 @@ namespace UsbRelayTest
                 Thread.Sleep(10000);
                 relayService.TurnAllOff();
             }
+
             if (debugConfigs.DebugThermometerOnly)
             {
                 I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>(), true);
                 double measuredTemp = thermometer.GetTemp(ThermometerConstants.Fahrenheit);
                 logger.LogDebug($"Measured temperature is {measuredTemp} Fahrenheit.");
             }
-            else
+
+
+            if(!debugConfigs.DebugRadio && !debugConfigs.DebugRelayOnly && !debugConfigs.DebugThermometerOnly)
             {
                 using (System.Timers.Timer tempTimer = new System.Timers.Timer(interval: tempCheckInterval))
                 {  
                     Random rand = new Random(23984256);
                     I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>(), false);
-                    RelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
+                    //RelayService relayService = new RelayService(serilogFactory.CreateLogger<RelayService>());
+                    IRelayService relayService = new LinuxFileHidDevice();
                     tempTimer.Elapsed += (sender, e) => TemperatureCheckHandler(logger, rand, thermometer, relayService);
                     tempTimer.Start();
+
+                    while (true)
+                    {
+                        Thread.Sleep(3000);
+                    }
                 }
             }
         }
@@ -104,7 +136,7 @@ namespace UsbRelayTest
             Microsoft.Extensions.Logging.ILogger logger,
             Random rand,
             I2CThermometer thermometer,
-            RelayService relayService)
+            IRelayService relayService)
         {
             double measuredTemp = thermometer.GetTemp(ThermometerConstants.Fahrenheit);
             logger.LogDebug($"Measured temperature is {measuredTemp} Fahrenheit.");
@@ -117,7 +149,7 @@ namespace UsbRelayTest
                     logger.LogInformation($"Temperature is 65 or less, and at least one fan is on, turning all fans off.");
                     relayService.TurnAllOff();
                 }
-            }
+            } 
             else if(measuredTemp.BetweenInclusive(66, 75))
             {
                 logger.LogDebug($"Temperature is between 66 and 75 workflow.");

@@ -6,6 +6,10 @@
     <ApplicationIcon />
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="hidlibrary" Version="3.3.40" />
     <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
@@ -24,6 +28,10 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\RelayServices\HidSharp\Interfaces\" />
   </ItemGroup>
 
 </Project>
