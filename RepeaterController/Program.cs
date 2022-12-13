@@ -68,6 +68,17 @@ namespace RepeaterController
             {
                 IPowerSensor powerSensor = new I2CPowerSensor(serilogFactory.CreateLogger<I2CPowerSensor>(), 0x24, true);
                 logger.LogDebug($"Power sensor logger returned value of {powerSensor.PowerSensorHealthcheck()}");
+
+                using (System.Timers.Timer powerTimer = new System.Timers.Timer(interval: tempCheckInterval))
+                {
+                    powerTimer.Elapsed += (sender, e) => PowerMeasurementHandler(logger, powerSensor);
+                    powerTimer.Start();
+
+                    while (true)
+                    {
+                        Thread.Sleep(3000);
+                    }
+                }
             }
 
             if (debugConfigs.DebugRadio)
