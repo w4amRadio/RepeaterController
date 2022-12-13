@@ -17,10 +17,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace UsbRelayTest
+namespace RepeaterController.Services
 {
-    public class I2CThermometer
+    public class I2CThermometer : I2CSensor
     {
+        //this is default value, but the device on radio 2 has been changed
         const byte mcp9808_thermometer_address = (byte)0x18;
 
         readonly byte[] readRegister = new byte[1] { (byte)MCP9808_Thermometer_Enums.ReadRegister };
@@ -30,24 +31,30 @@ namespace UsbRelayTest
         //private ReadOnlySpan<byte> temperatureAddress = 
         //    new ReadOnlySpan<byte>(new byte[] { (byte)MCP9808_Thermometer_Enums.ReadRegister }); 
 
-        protected I2cDevice device;
-        private ILogger _logger;
-
-        public I2CThermometer(ILogger logger, bool troubleshootingMode)
+        public I2CThermometer(ILogger logger, byte i2cAddress, bool troubleshootingMode) : base(logger, i2cAddress)
         {
-            if(logger == null)
+            if (logger == null)
             {
                 throw new ArgumentNullException($"Logger passed in to I2CThermometer must not be null!");
             }
 
-            _logger = logger; 
 
-            //what is our i2cBus Id?
-            I2cBus i2cbus = I2cBus.Create(1);
-            _logger.LogDebug($"I2cBus created.");
+            Thread.Sleep(300);
 
-            device = i2cbus.CreateDevice(mcp9808_thermometer_address);
-            _logger.LogDebug("I2c device found.  Sleeping 300 ms.");
+            if (troubleshootingMode)
+            {
+                _logger.LogDebug($"ManufacturerID: {GetManufacturerId()}");
+                _logger.LogDebug($"DeviceID: {GetDeviceId()}");
+            }
+        }
+
+        public I2CThermometer(ILogger logger, bool troubleshootingMode) : base(logger, mcp9808_thermometer_address)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException($"Logger passed in to I2CThermometer must not be null!");
+            }
+
             Thread.Sleep(300);
 
             if (troubleshootingMode)
@@ -91,8 +98,6 @@ namespace UsbRelayTest
             device.Write(resolutionByteBuffer);
             _logger.LogDebug("Resolution written to i2c temp device.");
             */
-
-            Thread.Sleep(300);
         }
 
         public int GetManufacturerId()

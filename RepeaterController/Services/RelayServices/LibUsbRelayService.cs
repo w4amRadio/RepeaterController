@@ -11,7 +11,7 @@ using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
 using Microsoft.Extensions.Logging;
 using RepeaterController.Interfaces;
-using UsbRelayTest;
+using RepeaterController;
 
 namespace RepeaterController.Services.RelayServices
 {

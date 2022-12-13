@@ -19,11 +19,14 @@ using RepeaterController.Interfaces;
 using RepeaterController.Models;
 using Serilog;
 using Serilog.Extensions.Logging;
-using UsbRelayTest.Extensions;
+using RepeaterController.Extensions;
 using RepeaterController.Services.RelayServices;
 using RepeaterController.Services.Radio;
+using RepeaterController.Services;
+using RepeaterController.Services.I2C;
+using System.Text.Json;
 
-namespace UsbRelayTest
+namespace RepeaterController
 {
     public class Program
     {
@@ -59,6 +62,13 @@ namespace UsbRelayTest
 
             var debugConfigs = config.GetSection($"Settings:{nameof(DebugConfigs)}")?.Get<DebugConfigs>();
             var radioConfigs = config.GetSection($"Settings:{nameof(RadioConfigs)}")?.Get<RadioConfigs>();
+            var i2cSensorConfigs = config.GetSection($"Settings:{nameof(I2cSensorConfigs)}")?.Get<I2cSensorConfigs>();
+
+            if (debugConfigs.DebugPowerSensorOnly)
+            {
+                IPowerSensor powerSensor = new I2CPowerSensor(serilogFactory.CreateLogger<I2CPowerSensor>(), 0x24, true);
+                logger.LogDebug($"Power sensor logger returned value of {powerSensor.PowerSensorHealthcheck()}");
+            }
 
             if (debugConfigs.DebugRadio)
             {
@@ -76,6 +86,11 @@ namespace UsbRelayTest
                 relayRadio.ChannelDown();
                 Thread.Sleep(3000);
                 relayRadio.ChannelDown();
+
+                Thread.Sleep(10000);
+                relayRadio.TurnOnfan();
+                Thread.Sleep(15000);
+                relayRadio.TurnOffFan();
             }
 
             if (debugConfigs.DebugRelayOnly)
@@ -102,13 +117,35 @@ namespace UsbRelayTest
 
             if (debugConfigs.DebugThermometerOnly)
             {
-                I2CThermometer thermometer = new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>(), true);
-                double measuredTemp = thermometer.GetTemp(ThermometerConstants.Fahrenheit);
-                logger.LogDebug($"Measured temperature is {measuredTemp} Fahrenheit.");
+                I2CThermometer vhfRadioThermometer = 
+                    new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>(), i2cSensorConfigs.FirstRadioTempAddress, true);
+
+                I2CThermometer uhfRadioThermometer =
+                    new I2CThermometer(serilogFactory.CreateLogger<I2CThermometer>(), i2cSensorConfigs.SecondRadioTempAddress, true);
+
+                for(int i = 0; i < 50; i++)
+                {
+                    logger.LogDebug($"Measured temperature of the vhf radio is {vhfRadioThermometer.GetTemp(ThermometerConstants.Fahrenheit)} Fahrenheit.");
+                    logger.LogDebug($"Measured temperature of the uhf radio is {uhfRadioThermometer.GetTemp(ThermometerConstants.Fahrenheit)} Fahrenheit.");
+                    Thread.Sleep(3000);
+                }
+            }
+
+            if (debugConfigs.DebugVoltmeterOnly)
+            {
+                I2CVoltmeter i2CVoltmeter = new I2CVoltmeter(serilogFactory.CreateLogger<I2CVoltmeter>());
+
+                for(int i = 0; i < 20; i++)
+                {
+                    logger.LogDebug($"Measured voltage is {i2CVoltmeter.GetBusVoltage()} Volts.");
+                    logger.LogDebug($"GetVoltage2 is {i2CVoltmeter.GetBusVoltage2()} Volts.");
+                    logger.LogDebug($"GetShuntVoltage is {i2CVoltmeter.GetShuntVoltage()} Volts.");
+                    Thread.Sleep(1000);
+                } 
             }
 
 
-            if(!debugConfigs.DebugRadio && !debugConfigs.DebugRelayOnly && !debugConfigs.DebugThermometerOnly)
+            if(!debugConfigs.DebugRadio && !debugConfigs.DebugRelayOnly && !debugConfigs.DebugThermometerOnly && !debugConfigs.DebugVoltmeterOnly)
             {
                 using (System.Timers.Timer tempTimer = new System.Timers.Timer(interval: tempCheckInterval))
                 {  
@@ -125,6 +162,13 @@ namespace UsbRelayTest
                     }
                 }
             }
+        }
+
+        private static void PowerMeasurementHandler(Microsoft.Extensions.Logging.ILogger logger, IPowerSensor powerSensor)
+        {
+            var powerMeasurement = powerSensor.GetPowerMeasurement();
+            logger.LogInformation($"Power Measurement Reading: {JsonSerializer.Serialize(powerMeasurement)}");
+            logger.LogInformation($"Power consumption at time {powerMeasurement.TimeTag} UTC is {powerMeasurement.MeasuredVoltage * powerMeasurement.MeasuredCurrent} watts.");
         }
 
         /// <summary>

@@ -10,11 +10,30 @@ using System.Threading.Tasks;
 
 namespace RepeaterController.Services.RelayServices
 {
+
+
+    /// <summary>
+    /// For classes you will need to use [StructLayout(LayoutKind.Sequential)] decorator
+    /// </summary>
+    struct hidraw_devinfo
+    {
+        public uint bustype;
+        public short vendor;
+        public short product;
+    };
+
     public class LinuxFileHidDevice : IRelayService, IDisposable
     {
 
+        internal const uint _IOC_READ = 2;
         internal const int OPEN_READ_WRITE = 2;
-        const string hid_device = "/dev/hidraw0";
+        const string hid_device = "/dev/hidraw0"; 
+
+
+        //#define HIDIOCGRAWINFO    _IOR('H', 0x03, struct hidraw_devinfo)
+
+
+        public string iProduct { get; private set; }
 
         const byte _IOC_NRBITS      = 8;
         const byte _IOC_TYPEBITS    = 8;
@@ -30,9 +49,12 @@ namespace RepeaterController.Services.RelayServices
         public bool OneIsOn { get; private set; }
         public bool TwoIsOn { get; private set; }
         public bool ThreeIsOn { get; private set; }
+        public bool FourIsOn { get; private set; }
 
         public LinuxFileHidDevice()
         {
+            GetRawInfoAboutDevice();
+
             //File.OpenWrite("/dev/hidraw0");
             int open_success_code = Open(hid_device, OPEN_READ_WRITE);
             if (open_success_code < 0)
@@ -40,7 +62,33 @@ namespace RepeaterController.Services.RelayServices
 
             deviceHandle = open_success_code;
 
+            Console.WriteLine($"findIor: {findIorForHidRawInfo((byte)'H', 6)}");
+
             Console.WriteLine($"findIoc: {findIoc(3, ((byte)'H'), 6, 3)}");
+        }
+
+        public void GetRawInfoAboutDevice()
+        {
+            hidraw_devinfo hidraw_Devinfo = new hidraw_devinfo();
+
+            int result = 0;
+            unsafe
+            {
+                int HIDIOCGRAWINFO = findIorForHidRawInfo((byte)'H', 6);
+
+                result = Ioctl(deviceHandle, HIDIOCGRAWINFO, (IntPtr)(&hidraw_Devinfo));
+
+                if(result < 0)
+                {
+                    throw new Exception($"An exception occured trying to read from the device with error code: {HIDIOCGRAWINFO}");
+                }
+                else
+                {
+                    Console.WriteLine($"Bus Type: {hidraw_Devinfo.bustype}");
+                    Console.WriteLine($"Vendor: {hidraw_Devinfo.vendor}");
+                    Console.WriteLine($"Product: {hidraw_Devinfo.product}");
+                }
+            }
         }
 
         public void WriteBytes(int numberOfCommands, byte[] bytes)
@@ -109,6 +157,14 @@ namespace RepeaterController.Services.RelayServices
         private static int findIoc(int dir, int type, int nr, int size)
         {
             return (((dir) << _IOC_DIRSHIFT) | ((type) << _IOC_TYPESHIFT) | ((nr) << _IOC_NRSHIFT) | ((size) << _IOC_SIZESHIFT));
+        }
+
+        private static int findIorForHidRawInfo(int type, int nr)
+        {
+            unsafe
+            {
+                return findIoc((int)_IOC_READ, type, nr, sizeof(hidraw_devinfo));
+            }
         }
 
         [DllImport("libc", EntryPoint = "open")]
@@ -214,6 +270,29 @@ namespace RepeaterController.Services.RelayServices
             send[2] = (byte)RelayDevices.Relay3;
             WriteBytes(3, send);
             ThreeIsOn = false;
+        }
+
+        #endregion
+
+        #region Relay Four
+        public void TurnFourOn()
+        {
+            byte[] send = new byte[3];
+            send[0] = 0x0;
+            send[1] = (byte)RelayCodes.OnSingle;
+            send[2] = (byte)RelayDevices.Relay4;
+            WriteBytes(3, send);
+            FourIsOn = true;
+        }
+
+        public void TurnFourOff()
+        {
+            byte[] send = new byte[9];
+            send[0] = 0x0;
+            send[1] = (byte)RelayCodes.OffSingle;
+            send[2] = (byte)RelayDevices.Relay4;
+            WriteBytes(3, send);
+            FourIsOn = false;
         }
 
         #endregion

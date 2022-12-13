@@ -17,6 +17,7 @@ namespace RepeaterController.Services.RelayServices
         RelayAll = (byte) 0x00,
         Relay1 = (byte) 0x01,
         Relay2 = (byte) 0x02,
-        Relay3 = (byte) 0x03
+        Relay3 = (byte) 0x03,
+        Relay4 = (byte) 0x04
     }
 }

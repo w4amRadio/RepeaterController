@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UsbRelayTest.Extensions
+namespace RepeaterController.Extensions
 {
     public static class ThermometerExtensions
     {

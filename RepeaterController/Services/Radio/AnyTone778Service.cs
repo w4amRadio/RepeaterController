@@ -10,13 +10,15 @@ using System.Threading.Tasks;
 
 namespace RepeaterController.Services.Radio
 {
-    public class AnyTone778Service : IRelayRadioService
+    public class AnyTone778Service : IRelayRadioService, ISerialCommRadio
     {
 
         private LinuxFileHidDevice _linuxFileHidDevice;
         private RadioConfigs _radioConfigs;
 
+
         public bool MicIsActive { get; private set; }
+        public bool FanIsActive { get; private set; }
 
         /// <summary>
         /// The 8 channel relay device will start back up with all relays in off when it loses power.
@@ -69,6 +71,29 @@ namespace RepeaterController.Services.Radio
                 Thread.Sleep(_radioConfigs.ChannelChangePushButtonTimeMs);
                 _linuxFileHidDevice.TurnThreeOff();
             }
+        }
+
+        public void TurnOnfan()
+        {
+            if (!FanIsActive)
+            {
+                _linuxFileHidDevice.TurnFourOn();
+                FanIsActive = true;
+            }
+        }
+
+        public void TurnOffFan()
+        {
+            if (FanIsActive)
+            {
+                _linuxFileHidDevice.TurnFourOff();
+                FanIsActive = false;
+            }
+        }
+
+        public void PullState()
+        {
+            
         }
     }
 }

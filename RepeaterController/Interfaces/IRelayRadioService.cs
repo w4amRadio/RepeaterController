@@ -14,5 +14,7 @@ namespace RepeaterController.Interfaces
 
         void ChannelUp();
         void ChannelDown();
+        void TurnOnfan();
+        void TurnOffFan();
     }
 }

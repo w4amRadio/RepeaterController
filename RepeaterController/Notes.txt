@@ -33,3 +33,18 @@ raspi-gpio set X --> dh sets GPIO pin X to drive high
 raspi-gpio set X --> dl sets GPIO pin X to drive low
 
 192.168.8.1
+
+
+
+https://do1alx.de/2022/anytone-factory-settings-mode/
+https://do1alx.de/2022/reverse-engineering-radios-arm-binary-images-in-ida-pro/
+https://chirp.danplanet.com/attachments/6117/20201023_anytone778uv.py
+
+
+GPIO Serial Comm:
+https://forums.raspberrypi.com/viewtopic.php?t=244528
+
+
+DTMF Relay:
+https://radionut53.wixsite.com/radionut63/4-channel-dtmf-controller-info
+https://5a03fba3-885f-47e3-9177-617d26f1f22f.filesusr.com/ugd/10abc6_76661cbc8af244d4987ecc9f2b9adef9.pdf
